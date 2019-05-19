@@ -2,49 +2,53 @@ package br.unisul.databaseload;
 
 public class DataModel {
 
-	private int idnEmpreendimento;
-	private int idnDigs;
-	private String dscTitulo;
+	private int cnpj;
+	private String nome;
+	private String endereco;
+	public String produto;
 	public boolean finish;
-
-	public DataModel(int idnEmpreendimento, int idnDigs, String dscTitulo) {
-		super();
-		this.idnEmpreendimento = idnEmpreendimento;
-		this.idnDigs = idnDigs;
-		this.dscTitulo = dscTitulo;
-	}
 
 	public DataModel() {
 
 	}
 
-	public int getIdnEmpreendimento() {
-		return idnEmpreendimento;
+	public int getCnpj() {
+		return cnpj;
 	}
 
-	public void setIdnEmpreendimento(int idnEmpreendimento) {
-		this.idnEmpreendimento = idnEmpreendimento;
+	public void setCnpj(int cnpj) {
+		this.cnpj = cnpj;
 	}
 
-	public int getIdnDigs() {
-		return idnDigs;
+	public String getNome() {
+		return nome;
 	}
 
-	public void setIdnDigs(int idnDigs) {
-		this.idnDigs = idnDigs;
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
-	public String getDscTitulo() {
-		return dscTitulo;
+	public String getEndereco() {
+		return endereco;
 	}
 
-	public void setDscTitulo(String dscTitulo) {
-		this.dscTitulo = dscTitulo;
+	public void setEndereco(String endereco) {
+		this.endereco = endereco;
+	}
+
+	public String getProduto() {
+		return produto;
+	}
+
+	public void setProduto(String produto) {
+		this.produto = produto;
 	}
 
 	@Override
 	public String toString() {
-		return "Dado [idnEmpreendimento=" + idnEmpreendimento + ", idnDigs=" + idnDigs + ", "
-				+ (dscTitulo != null ? "dscTitulo=" + dscTitulo : "") + "]";
+		return "DataModel [cnpj=" + cnpj + ", " + (nome != null ? "nome=" + nome + ", " : "")
+				+ (endereco != null ? "endereco=" + endereco + ", " : "")
+				+ (produto != null ? "produto=" + produto + ", " : "") + "finish=" + finish + "]";
 	}
+
 }

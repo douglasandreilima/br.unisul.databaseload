@@ -12,7 +12,7 @@ public class App {
 
 		BlockingQueue<DataModel> sharedMemory = new ArrayBlockingQueue<DataModel>(1000);
 
-		Thread reader = new Thread(new ReadDataXls("test-files/PAC_2018_06.xlsx", sharedMemory));
+		Thread reader = new Thread(new ReadDataXls("test-files/infopreco1.xlsx", sharedMemory));
 		Thread writer = new Thread(new DatabaseWriter(sharedMemory));
 		long start = System.currentTimeMillis();
 
@@ -21,8 +21,8 @@ public class App {
 
 		while (reader.isAlive() && writer.isAlive()) {
 			Thread.sleep(500);
-
 		}
+
 		System.out.println("Total time: " + (System.currentTimeMillis() - start));
 	}
 }

@@ -60,9 +60,10 @@ public class ReadDataXls extends Thread {
 				Row row = rowIt.next();
 
 				if (row.getRowNum() > 0) {
-					dado.setIdnEmpreendimento((int) row.getCell(0).getNumericCellValue());
-					dado.setIdnDigs((int) row.getCell(1).getNumericCellValue());
-					dado.setDscTitulo(row.getCell(2).getStringCellValue());
+					dado.setCnpj((int) row.getCell(0).getNumericCellValue());
+					dado.setNome(row.getCell(1).getStringCellValue());
+					dado.setEndereco(row.getCell(2).getStringCellValue());
+					dado.setProduto(row.getCell(7).getStringCellValue());
 
 					queue.put(dado);
 

@@ -27,15 +27,16 @@ public class DatabaseWriter extends Thread {
 
 		conexao = ModuloConexao.conector();
 
-		String sql = "INSERT INTO DADOSGOV(idn_empreendimento,idn_digs,dsc_titulo) VALUES(?,?,?)";
+		String sql = "INSERT INTO info(cnpj,nome,endereco,produto) VALUES(?,?,?,?)";
 
 		try {
 			pst = conexao.prepareStatement(sql);
 
 			while (!(queue.take().finish)) {
-				pst.setInt(1, queue.take().getIdnEmpreendimento());
-				pst.setInt(2, queue.take().getIdnDigs());
-				pst.setString(3, queue.take().getDscTitulo());
+				pst.setInt(1, queue.take().getCnpj());
+				pst.setString(2, queue.take().getNome());
+				pst.setString(3, queue.take().getEndereco());
+				pst.setString(4, queue.take().getProduto());
 
 				pst.executeUpdate();
 			}
