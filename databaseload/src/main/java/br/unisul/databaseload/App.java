@@ -1,7 +1,6 @@
 package br.unisul.databaseload;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.List;
 
 /**
  * Hello world!
@@ -10,18 +9,13 @@ import java.util.concurrent.BlockingQueue;
 public class App {
 	public static void main(String[] args) throws InterruptedException {
 
-		BlockingQueue<DataModel> sharedMemory = new ArrayBlockingQueue<DataModel>(1000);
-
-		Thread reader = new Thread(new ReadDataXls("test-files/infopreco1.xlsx", sharedMemory));
-		Thread writer = new Thread(new DatabaseWriter(sharedMemory));
 		long start = System.currentTimeMillis();
 
-		reader.start();
-		writer.start();
+		List<DataModel> list = new ReadDataXls().lerDadosXls("test-files/infopreco1.xlsx");
 
-		while (reader.isAlive() && writer.isAlive()) {
-			Thread.sleep(500);
-		}
+		DatabaseWriter databaseWriter = new DatabaseWriter(list);
+
+		databaseWriter.insertInfo();
 
 		System.out.println("Total time: " + (System.currentTimeMillis() - start));
 	}

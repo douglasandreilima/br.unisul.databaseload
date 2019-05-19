@@ -3,44 +3,24 @@ package br.unisul.databaseload;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class ReadDataXls extends Thread {
+public class ReadDataXls {
 
-	private String caminhoArquivo;
-
-	protected BlockingQueue<DataModel> queue = null;
-
-	@Override
-	public void run() {
-		this.recuperarListaArquivo();
+	public ReadDataXls() {
 	}
 
-	public ReadDataXls(String caminhoRaiz, BlockingQueue<DataModel> queue) {
-		this.queue = queue;
-		this.caminhoArquivo = caminhoRaiz;
-	}
+	public List<DataModel> lerDadosXls(String caminhoArquivo) throws InterruptedException {
 
-	private void recuperarListaArquivo() {
-		try {
+		List<DataModel> list = new ArrayList<DataModel>();
 
-			this.lerDadosXls(caminhoArquivo);
-
-			// queue.put(null);
-		} catch (InterruptedException e) {
-			System.err.println(e);
-		}
-	}
-
-	private void lerDadosXls(String caminhoArquivo) throws InterruptedException {
 		File excelFile = new File(caminhoArquivo);
-
-		DataModel dado = new DataModel();
 
 		FileInputStream fis = null;
 
@@ -60,14 +40,13 @@ public class ReadDataXls extends Thread {
 				Row row = rowIt.next();
 
 				if (row.getRowNum() > 0) {
+					DataModel dado = new DataModel();
 					dado.setCnpj((int) row.getCell(0).getNumericCellValue());
 					dado.setNome(row.getCell(1).getStringCellValue());
 					dado.setEndereco(row.getCell(2).getStringCellValue());
 					dado.setProduto(row.getCell(7).getStringCellValue());
 
-					queue.put(dado);
-
-					System.out.println(dado.toString());
+					list.add(dado);
 				}
 
 				// Iterator<Cell> cellIterator = row.cellIterator();
@@ -78,6 +57,8 @@ public class ReadDataXls extends Thread {
 				//
 				// }
 			}
+
+			return list;
 		} catch (IOException e) {
 			e.printStackTrace();
 
@@ -90,5 +71,6 @@ public class ReadDataXls extends Thread {
 			}
 
 		}
+		return null;
 	}
 }
