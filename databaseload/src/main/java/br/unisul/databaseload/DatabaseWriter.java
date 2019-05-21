@@ -15,7 +15,12 @@ public class DatabaseWriter {
 		this.list = list;
 	}
 
-	public void insertInfo() {
+	public void inserirDados() {
+		for (DataModel dataModel : list) {
+			insertInfo(dataModel);
+		}
+	}
+	private void insertInfo(DataModel dataModel) {
 
 		Connection conexao = null;
 		PreparedStatement pst = null;
@@ -27,14 +32,13 @@ public class DatabaseWriter {
 		try {
 			pst = conexao.prepareStatement(sql);
 
-			for (DataModel dataModel : list) {
-				pst.setInt(1, dataModel.getCnpj());
-				pst.setString(2, dataModel.getNome());
-				pst.setString(3, dataModel.getEndereco());
-				pst.setString(4, dataModel.getProduto());
+			
+//				pst.setInt(1, dataModel.getCnpj());
+//				pst.setString(2, dataModel.getNome());
+//				pst.setString(3, dataModel.getEndereco());
+//				pst.setString(4, dataModel.getProduto());
 
 				pst.executeUpdate();
-			}
 
 		} catch (SQLException e) {
 			System.err.println(e);

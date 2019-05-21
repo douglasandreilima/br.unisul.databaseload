@@ -1,7 +1,9 @@
 package br.unisul.databaseload;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,64 +15,46 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ReadDataXls {
 
-	public ReadDataXls() {
-	}
+	public List<DataModel> ler(String caminho) {
 
-	public List<DataModel> lerDadosXls(String caminhoArquivo) throws InterruptedException {
+        String arquivoCSV = caminho;
+        BufferedReader conteudoCSV = null;
+        String linha = "";
+        String csvSeparadorCampo = ";";
+        String[] dado = null;
+        List<DataModel> list = new ArrayList<DataModel>();
 
-		List<DataModel> list = new ArrayList<DataModel>();
+        try {
+            conteudoCSV = new BufferedReader(new FileReader(arquivoCSV));
 
-		File excelFile = new File(caminhoArquivo);
+            while ((linha = conteudoCSV.readLine()) != null) {
+                dado = linha.split(csvSeparadorCampo);
 
-		FileInputStream fis = null;
+                DataModel novoDado = new DataModel();
+                novoDado.setNome(dado[0]);
+                novoDado.setCpf(dado[1]);
+                novoDado.setMatriculaServidor(dado[3]);
+                novoDado.setNomeOrgao(dado[4]);
+                novoDado.setSiglaOrgao(dado[5]);
+                novoDado.setCodigoOrgaoSuperior(dado[6]);
+                novoDado.setCargo(dado[7]);
+                novoDado.setClasse(dado[8]);
+                novoDado.setPadrao(dado[9]);
+                novoDado.setReferencia(dado[10]);
+                novoDado.setTipoAposentadoria(dado[11]);
+                novoDado.setFundamentacaoInatividade(dado[12]);
+                novoDado.setNomeDiploma(dado[13]);
+                novoDado.setDataPublicacaoDiploma(dado[14]);
+                novoDado.setIngressoServicoPublico(dado[15]);
+                novoDado.setDataIngressoServico(dado[16]);
+                novoDado.setValorRendimento(dado[17]);
+                
+                list.add(novoDado);
+            }
 
-		XSSFWorkbook workbook = null;
-
-		try {
-
-			fis = new FileInputStream(excelFile);
-
-			workbook = new XSSFWorkbook(fis);
-
-			XSSFSheet sheet = workbook.getSheetAt(0);
-
-			Iterator<Row> rowIt = sheet.iterator();
-
-			while (rowIt.hasNext()) {
-				Row row = rowIt.next();
-
-				if (row.getRowNum() > 0) {
-					DataModel dado = new DataModel();
-					dado.setCnpj((int) row.getCell(0).getNumericCellValue());
-					dado.setNome(row.getCell(1).getStringCellValue());
-					dado.setEndereco(row.getCell(2).getStringCellValue());
-					dado.setProduto(row.getCell(7).getStringCellValue());
-
-					list.add(dado);
-				}
-
-				// Iterator<Cell> cellIterator = row.cellIterator();
-				// while (cellIterator.hasNext()) {
-				// Cell cell = cellIterator.next();
-				// System.out.println(row.getCell(0).getStringCellValue() + " ; ");
-				// queue.put(cell.toString() + " ; ");
-				//
-				// }
-			}
-
-			return list;
-		} catch (IOException e) {
-			e.printStackTrace();
-
-		} finally {
-			try {
-				fis.close();
-				workbook.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-		}
-		return null;
-	}
+        } catch (IOException e) {
+        }
+        
+        return list;
+    }
 }
