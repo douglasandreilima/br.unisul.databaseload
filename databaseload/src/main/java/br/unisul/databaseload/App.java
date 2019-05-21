@@ -12,7 +12,8 @@ public class App {
 		long start = System.currentTimeMillis();
 		
 		ReadDataXls reader = new ReadDataXls();
-		List<DataModel> list = reader.ler("test-files/aposentados-012018.xlsx");
+		
+		List<DataModel> list = reader.ler("test-files/aposentados-012018.csv");
 
 		DatabaseWriter databaseWriter = new DatabaseWriter(list);
 
