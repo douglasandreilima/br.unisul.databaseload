@@ -2,6 +2,9 @@ package br.unisul.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ModuloConexao {
 
@@ -20,5 +23,18 @@ public class ModuloConexao {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static int insertDatabase(PreparedStatement statement) {
+		int idReturn = 0;
+		try {
+			ResultSet rs = statement.executeQuery();
+			if(rs.next()) {
+				idReturn = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			System.err.println(e);
+		}
+		return idReturn;
 	}
 }
