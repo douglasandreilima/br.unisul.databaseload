@@ -32,7 +32,7 @@ public class ReadDataXls {
 			} catch (IOException e) {
 				System.err.println("error to read files " + e.getMessage());
 			}
-		}else {
+		} else {
 			System.err.println("directory not found " + directory);
 		}
 		return list;
@@ -42,14 +42,15 @@ public class ReadDataXls {
 		DataModel novoDado = new DataModel();
 		novoDado.setNome(dado[0]);
 		novoDado.setCpf(dado[1]);
-		novoDado.setMatriculaServidor(dado[3]);
-		novoDado.setNomeOrgao(dado[4]);
-		novoDado.setSiglaOrgao(dado[5]);
-		novoDado.setCodigoOrgaoSuperior(dado[6]);
-		novoDado.setCargo(dado[7]);
-		novoDado.setClasse(dado[8]);
-		novoDado.setPadrao(dado[9]);
-		novoDado.setReferencia(dado[10]);
+		novoDado.setMatriculaServidor(dado[2]);
+		novoDado.setNomeOrgao(dado[3]);
+		novoDado.setSiglaOrgao(dado[4]);
+		novoDado.setCodigoOrgaoSuperior(dado[5]);
+		novoDado.setCargo(dado[6]);
+		novoDado.setClasse(dado[7]);
+		novoDado.setPadrao(dado[8]);
+		novoDado.setReferencia(dado[9]);
+		novoDado.setNivel(dado[10]);
 		novoDado.setTipoAposentadoria(dado[11]);
 		novoDado.setFundamentacaoInatividade(dado[12]);
 		novoDado.setNomeDiploma(dado[13]);

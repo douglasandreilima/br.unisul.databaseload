@@ -27,6 +27,7 @@ public class DatabaseWriter {
 
 	public void inserirDados(List<DataModel> list) {
 		for (DataModel dataModel : list) {
+			System.out.println("Insert row");
 			insertPessoa(dataModel);
 			insertOrgao(dataModel);
 			insertCargo(dataModel);
@@ -37,19 +38,19 @@ public class DatabaseWriter {
 	}
 
 	private void insertPessoa(DataModel dataModel) {
-		if(pessoa.containsKey(dataModel.getCpf()))
+		if (pessoa.containsKey(dataModel.getMatriculaServidor()))
 			return;
-		
+
 		Connection conn = ModuloConexao.conector();
-		String sql = "INSERT INTO pessoa(nome, cpf, matricula_servidor) values(?,?,?)";
+		String sql = "INSERT INTO pessoa(nome, cpf, matricula_servidor) values(?,?,?) RETURNING id_pessoa";
 
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, dataModel.getNome());
 			statement.setString(2, dataModel.getCpf());
-			statement.setString(3, dataModel.getMatriculaServidor());
+			statement.setLong(3, Long.parseLong(dataModel.getMatriculaServidor()));
 			int idReturn = ModuloConexao.insertDatabase(statement);
-			pessoa.put(dataModel.getCpf(), idReturn);
+			pessoa.put(dataModel.getMatriculaServidor(), idReturn);
 		} catch (SQLException e) {
 			System.err.println(e);
 		} finally {
@@ -61,13 +62,14 @@ public class DatabaseWriter {
 	}
 
 	private void insertCargo(DataModel dataModel) {
-		String cargoName = dataModel.getCargo() + dataModel.getClasse() + dataModel.getPadrao() + dataModel.getNivel();
+		String cargoName = dataModel.getCargo() + dataModel.getClasse() + dataModel.getPadrao() + dataModel.getNivel()
+				+ dataModel.getSiglaOrgao();
 
 		if (cargo.containsKey(cargoName))
 			return;
 
 		Connection conn = ModuloConexao.conector();
-		String sql = "INSERT INTO cargo(nome_cargo, classe, padrao, nivel, referencia, id_orgao) values() RETURNING id_cargo";
+		String sql = "INSERT INTO cargo(nome_cargo, classe, padrao, nivel, referencia, id_orgao) values(?,?,?,?,?,?) RETURNING id_cargo";
 
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
@@ -80,7 +82,7 @@ public class DatabaseWriter {
 			int idReturn = ModuloConexao.insertDatabase(statement);
 			cargo.put(cargoName, idReturn);
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		} finally {
 			try {
 				conn.close();
@@ -90,9 +92,9 @@ public class DatabaseWriter {
 	}
 
 	private void insertOrgao(DataModel dataModel) {
-		if(orgao.containsKey(dataModel.getNomeOrgao()))
+		if (orgao.containsKey(dataModel.getNomeOrgao()))
 			return;
-		
+
 		Connection conn = ModuloConexao.conector();
 		String sql = "INSERT INTO orgao(nome_orgao, sigla_orgao, cod_orgao_superior) values(?,?,?) RETURNING id_orgao";
 
@@ -104,7 +106,7 @@ public class DatabaseWriter {
 			int idReturn = ModuloConexao.insertDatabase(statement);
 			orgao.put(dataModel.getNomeOrgao(), idReturn);
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		} finally {
 			try {
 				conn.close();
@@ -114,9 +116,9 @@ public class DatabaseWriter {
 	}
 
 	private void insertAposentadoria(DataModel dataModel) {
-		if(tipoAposentadoria.containsKey(dataModel.getTipoAposentadoria()))
+		if (tipoAposentadoria.containsKey(dataModel.getTipoAposentadoria()))
 			return;
-		
+
 		Connection conn = ModuloConexao.conector();
 		String sql = "INSERT INTO aposentadoria(tipo_aposentadoria) values(?) RETURNING id_aposentadoria";
 
@@ -126,7 +128,7 @@ public class DatabaseWriter {
 			int idReturn = ModuloConexao.insertDatabase(statement);
 			tipoAposentadoria.put(dataModel.getTipoAposentadoria(), idReturn);
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		} finally {
 			try {
 				conn.close();
@@ -137,18 +139,19 @@ public class DatabaseWriter {
 
 	private void insertPessoaCargo(DataModel dataModel) {
 		Connection conn = ModuloConexao.conector();
-		String sql = "INSERT INTO pessoa_cargo(id_pessoa, id_cargo, tipo_ingresso, data_ingresso) values(?,?,?,?)";
-		String cargoName = dataModel.getCargo() + dataModel.getClasse() + dataModel.getPadrao() + dataModel.getNivel();
-		long dataIngresso = getDateTime(dataModel.getIngressoServicoPublico());
+		String sql = "INSERT INTO pessoa_cargo(id_pessoa, id_cargo, tipo_ingresso, data_ingresso) values(?,?,?,?) RETURNING null";
+		String cargoName = dataModel.getCargo() + dataModel.getClasse() + dataModel.getPadrao() + dataModel.getNivel()
+				+ dataModel.getSiglaOrgao();
+		long dataIngresso = getDateTime(dataModel.getDataIngressoServico());
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
-			statement.setInt(1, pessoa.get(dataModel.getCpf()));
+			statement.setInt(1, pessoa.get(dataModel.getMatriculaServidor()));
 			statement.setInt(2, cargo.get(cargoName));
 			statement.setInt(3, tipoAposentadoria.get(dataModel.getTipoAposentadoria()));
 			statement.setDate(4, new java.sql.Date(dataIngresso));
 			ModuloConexao.insertDatabase(statement);
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		} finally {
 			try {
 				conn.close();
@@ -159,21 +162,22 @@ public class DatabaseWriter {
 
 	private void insertPessoaAposentadoria(DataModel dataModel) {
 		Connection conn = ModuloConexao.conector();
-		String sql = "INSERT INTO data_ingresso(id_aposentadoria, "
+		String sql = "INSERT INTO pessoa_aposentadoria(id_aposentadoria, "
 				+ "id_pessoa, valor_rendimento, data_pub_diploma_legal, "
-				+ "nome_diploma_legal,fundamentacao_inatividade) values(?,?,?,?,?,?)";
+				+ "nome_diploma_legal,fundamentacao_inatividade) values(?,?,?,?,?,?) RETURNING null";
 		long dataPubDiploma = getDateTime(dataModel.getDataPublicacaoDiploma());
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, tipoAposentadoria.get(dataModel.getTipoAposentadoria()));
-			statement.setInt(2, pessoa.get(dataModel.getCpf()));
-			statement.setDouble(3, Double.parseDouble(dataModel.getValorRendimento()));
+			statement.setInt(2, pessoa.get(dataModel.getMatriculaServidor()));
+			statement.setDouble(3,
+					Double.parseDouble(dataModel.getValorRendimento().replaceAll("\\.", "").replaceAll("\\,", ".")));
 			statement.setDate(4, new java.sql.Date(dataPubDiploma));
 			statement.setString(5, dataModel.getNomeDiploma());
 			statement.setString(6, dataModel.getFundamentacaoInatividade());
 			ModuloConexao.insertDatabase(statement);
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		} finally {
 			try {
 				conn.close();
@@ -192,6 +196,7 @@ public class DatabaseWriter {
 			try {
 				dateTime = format.parse(stringDate).getTime();
 			} catch (ParseException e) {
+				e.printStackTrace();
 				System.err.println("error to parse date " + e.getMessage());
 			}
 		}
