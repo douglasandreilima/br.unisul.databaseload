@@ -3,6 +3,7 @@ package br.unisul.databaseload;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class DatabaseWriter {
 
 	public void inserirDados(List<DataModel> list) {
 		for (DataModel dataModel : list) {
-			System.out.println("Insert row");
+			System.out.println("Insert row pessoa = "+dataModel.getNome() );
 			insertPessoa(dataModel);
 			insertOrgao(dataModel);
 			insertCargo(dataModel);
@@ -142,13 +143,17 @@ public class DatabaseWriter {
 		String sql = "INSERT INTO pessoa_cargo(id_pessoa, id_cargo, tipo_ingresso, data_ingresso) values(?,?,?,?) RETURNING null";
 		String cargoName = dataModel.getCargo() + dataModel.getClasse() + dataModel.getPadrao() + dataModel.getNivel()
 				+ dataModel.getSiglaOrgao();
-		long dataIngresso = getDateTime(dataModel.getDataIngressoServico());
+		Long dataIngresso = getDateTime(dataModel.getDataIngressoServico().trim());
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, pessoa.get(dataModel.getMatriculaServidor()));
 			statement.setInt(2, cargo.get(cargoName));
-			statement.setInt(3, tipoAposentadoria.get(dataModel.getTipoAposentadoria()));
-			statement.setDate(4, new java.sql.Date(dataIngresso));
+			statement.setString(3, dataModel.getIngressoServicoPublico());
+			if(dataIngresso == null) {
+				statement.setNull(4, Types.DATE);
+			}else {
+				statement.setDate(4, new java.sql.Date(dataIngresso));
+			}
 			ModuloConexao.insertDatabase(statement);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -165,17 +170,46 @@ public class DatabaseWriter {
 		String sql = "INSERT INTO pessoa_aposentadoria(id_aposentadoria, "
 				+ "id_pessoa, valor_rendimento, data_pub_diploma_legal, "
 				+ "nome_diploma_legal,fundamentacao_inatividade) values(?,?,?,?,?,?) RETURNING null";
-		long dataPubDiploma = getDateTime(dataModel.getDataPublicacaoDiploma());
+		
+			Long dataPubDiploma = getDateTime(dataModel.getDataPublicacaoDiploma().trim());
 		try {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, tipoAposentadoria.get(dataModel.getTipoAposentadoria()));
 			statement.setInt(2, pessoa.get(dataModel.getMatriculaServidor()));
 			statement.setDouble(3,
 					Double.parseDouble(dataModel.getValorRendimento().replaceAll("\\.", "").replaceAll("\\,", ".")));
-			statement.setDate(4, new java.sql.Date(dataPubDiploma));
+			
+			if(dataPubDiploma == null) {
+				statement.setNull(4, Types.DATE);
+			}else {
+				statement.setDate(4, new java.sql.Date(dataPubDiploma));
+			}
 			statement.setString(5, dataModel.getNomeDiploma());
 			statement.setString(6, dataModel.getFundamentacaoInatividade());
 			ModuloConexao.insertDatabase(statement);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			updatePessoa_Aposentadoria(dataModel);
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+			}
+		}
+	}
+	
+	private void updatePessoa_Aposentadoria (DataModel dataModel) {
+		String sql = "UPDATE pessoa_aposentadoria set valor_rendimento = ? WHERE id_pessoa = ? AND id_aposentadoria = ?";
+		Connection conn = ModuloConexao.conector();
+		
+		try {
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setDouble(1,
+					Double.parseDouble(dataModel.getValorRendimento().replaceAll("\\.", "").replaceAll("\\,", ".")));
+			statement.setInt(2, pessoa.get(dataModel.getMatriculaServidor()));
+			statement.setInt(3, tipoAposentadoria.get(dataModel.getTipoAposentadoria()));
+			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -184,9 +218,9 @@ public class DatabaseWriter {
 			} catch (SQLException e) {
 			}
 		}
+		
 	}
-
-	private long getDateTime(String stringDate) {
+	private Long getDateTime(String stringDate) {
 		long dateTime = 0;
 		if (stringDate != null && !stringDate.isEmpty()) {
 			SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
@@ -199,8 +233,9 @@ public class DatabaseWriter {
 				e.printStackTrace();
 				System.err.println("error to parse date " + e.getMessage());
 			}
+		}else {
+			return null;
 		}
-		;
 		return dateTime;
 	}
 }
